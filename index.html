@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>EtherPunks</title>
+</head>
+
+<body>
+    <div class="start-page">
+        <h1>EtherPunks</h1>
+        <button id="startGameButton">Start Game</button>
+    </div>
+    <canvas id="gameCanvas" width="512" height="512"></canvas>
+    <script src="main.js"></script>
+
+    <script>
+        const startPage = document.querySelector('.start-page');
+        const gameCanvas = document.getElementById('gameCanvas');
+        const startGameButton = document.getElementById('startGameButton');
+
+        startGameButton.addEventListener('click', () => {
+            startPage.style.display = 'none';
+            gameCanvas.style.display = 'block';
+            startGame();
+        });
+
+        function startGame() {
+            gameLoop()
+        }
+    </script>
+</body>
+
+</html>
+</body>
+
+</html>
