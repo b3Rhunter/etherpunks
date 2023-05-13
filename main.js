@@ -1,27 +1,23 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
 const playerImgRight = new Image();
 playerImgRight.src = './images/hero_right.png';
-
 const playerImgLeft = new Image();
 playerImgLeft.src = './images/hero_left.png';
-
 const background = new Image();
 background.src = './images/background.png';
-
 const platformImg = new Image();
 platformImg.src = './images/platforms.png';
-
 const enemyImg = new Image();
 enemyImg.src = './images/enemy.png';
-
 const enemies = [];
 const numberOfEnemies = 10;
+const playerSpriteSheet = new Image();
+playerSpriteSheet.src = './images/hero_spritesheet.png';
 
 for (let i = 0; i < numberOfEnemies; i++) {
     const enemy = {
-        x: 300 + i * 250, // This will space out the enemies on the x axis
+        x: 300 + i * 250,
         y: 424,
         width: 32,
         height: 48,
@@ -50,8 +46,14 @@ const player = {
     velocityY: 0,
     onGround: false,
     speed: 5,
+    moving: false,
     direction: 'right'
 };
+
+const frameCount = 4;
+let currentFrame = 0;
+const frameWidth = player.width;
+const frameHeight = player.height;
 
 const platforms = [
     { x: 0, y: 472, width: 512, height: 40 }, // First floor section
@@ -130,8 +132,6 @@ for (const enemy of enemies) {
         player.x + player.width > enemy.x &&
         player.y < enemy.y + enemy.height &&
         player.y + player.height > enemy.y) {
-        // collision detected!
-        // Check if the player jumped on top of the enemy
         if (previousPlayerY + player.height <= enemy.y) {
             enemies.splice(enemies.indexOf(enemy), 1);
         } else {
@@ -150,8 +150,19 @@ for (const enemy of enemies) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(background, -camera.x, -camera.y, worldWidth, worldHeight);
-    const playerImg = player.direction === 'right' ? playerImgRight : playerImgLeft;
-    ctx.drawImage(playerImg, player.x - camera.x, player.y - camera.y, player.width, player.height);
+    ctx.drawImage(
+        playerSpriteSheet, // image
+        (currentFrame % 2) * frameWidth, // source x
+        player.direction === 'right' ? 0 : frameHeight, // source y
+        frameWidth, // source width
+        frameHeight, // source height
+        player.x - camera.x, // target x
+        player.y - camera.y, // target y
+        player.width, // target width
+        player.height // target height
+    );    
+   // const playerImg = player.direction === 'right' ? playerImgRight : playerImgLeft;
+    //ctx.drawImage(playerImg, player.x - camera.x, player.y - camera.y, player.width, player.height);
     for (const platform of platforms) {
         ctx.drawImage(platformImg, platform.x - camera.x, platform.y - camera.y, platform.width, platform.height);
     } 
@@ -162,9 +173,14 @@ function draw() {
 
 function gameLoop() {
     update();
+    if (player.moving && gameLoop.counter++ % 10 === 0) {
+        currentFrame = (currentFrame + 1) % frameCount;
+    }
     draw();
     requestAnimationFrame(gameLoop);
 }
+
+gameLoop.counter = 0;
 
 document.addEventListener('keydown', (event) => {
     if (event.code === 'Space' && player.onGround) {
@@ -181,10 +197,18 @@ document.addEventListener('keydown', (event) => {
         player.velocityX = player.speed;
         player.direction = 'right';
     }
+
+    if (event.code === 'ArrowLeft' || event.code === 'ArrowRight') {
+        player.moving = true;
+    }
 });
 
 document.addEventListener('keyup', (event) => {
     if (event.code === 'ArrowLeft' || event.code === 'ArrowRight') {
         player.velocityX = 0;
+    }
+
+    if (event.code === 'ArrowLeft' || event.code === 'ArrowRight') {
+        player.moving = false;
     }
 });
