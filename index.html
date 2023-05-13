@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
     <title>EtherPunks</title>
 </head>
-
 <body>
     <div class="start-page">
         <h1>EtherPunks</h1>
         <button id="startGameButton">Start Game</button>
     </div>
-
     <div class="game-over-page" style="display: none;">
         <h1>Game Over</h1>
         <button id="playAgainButton">Play Again</button>
     </div>
+    <div class="level-complete-page" style="display: none;">
+        <h1>Level Complete!</h1>
+        <button id="nextLevelButton">Next Level</button>
+    </div>
     
     <canvas id="gameCanvas" width="512" height="512"></canvas>
     <script src="main.js"></script>
-
     <script>
         const startPage = document.querySelector('.start-page');
         const gameCanvas = document.getElementById('gameCanvas');
         const startGameButton = document.getElementById('startGameButton');
-
         startGameButton.addEventListener('click', () => {
             startPage.style.display = 'none';
             gameCanvas.style.display = 'block';
             startGame();
         });
-
         function startGame() {
-    // Reset player position and velocity
     player.x = 50;
     player.y = 300;
     player.velocityX = 0;
@@ -41,8 +38,6 @@
     player.onGround = false;
     player.moving = false;
     player.direction = 'right';
-
-    // Reset enemies
     enemies.length = 0;
     for (let i = 0; i < numberOfEnemies; i++) {
         const enemy = {
@@ -55,22 +50,16 @@
         };
         enemies.push(enemy);
     }
-
-    // Reset camera position
     camera.x = 0;
     camera.y = 0;
 
     if (gameLoopId) {
         cancelAnimationFrame(gameLoopId);
     }
-    // Start the game loop
     gameLoop();
 }
-
     </script>
 </body>
-
 </html>
 </body>
-
 </html>
