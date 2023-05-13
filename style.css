@@ -26,6 +26,15 @@ canvas {
     text-align: center;
 }
 
+.game-over-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+
 h1 {
     color: #fff;
     font-size: 3rem;

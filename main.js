@@ -135,9 +135,12 @@ for (const enemy of enemies) {
         if (previousPlayerY + player.height <= enemy.y) {
             enemies.splice(enemies.indexOf(enemy), 1);
         } else {
-            //alert("Game Over");
-            location.reload();
+            gameOver();
         }
+    }
+    function gameOver() {
+        gameCanvas.style.display = 'none';
+        gameOverPage.style.display = 'flex';
     }
 }
 
@@ -150,17 +153,19 @@ for (const enemy of enemies) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(background, -camera.x, -camera.y, worldWidth, worldHeight);
-    ctx.drawImage(
-        playerSpriteSheet, // image
-        (currentFrame % 2) * frameWidth, // source x
-        player.direction === 'right' ? 0 : frameHeight, // source y
-        frameWidth, // source width
-        frameHeight, // source height
-        player.x - camera.x, // target x
-        player.y - camera.y, // target y
-        player.width, // target width
-        player.height // target height
-    );    
+ctx.drawImage(
+    playerSpriteSheet, // image
+    (currentFrame % 2) * frameWidth, // source x
+    player.direction === 'right' ? 0 : frameHeight, // source y
+    frameWidth, // source width
+    frameHeight, // source height
+    player.x - camera.x, // target x
+    player.y - camera.y, // target y
+    player.width, // target width
+    player.height // target height
+);
+
+    
    // const playerImg = player.direction === 'right' ? playerImgRight : playerImgLeft;
     //ctx.drawImage(playerImg, player.x - camera.x, player.y - camera.y, player.width, player.height);
     for (const platform of platforms) {
@@ -171,16 +176,29 @@ function draw() {
     }   
 }
 
+let gameLoopId;
+
 function gameLoop() {
     update();
     if (player.moving && gameLoop.counter++ % 10 === 0) {
         currentFrame = (currentFrame + 1) % frameCount;
     }
     draw();
-    requestAnimationFrame(gameLoop);
+    gameLoopId = requestAnimationFrame(gameLoop);
 }
 
+
 gameLoop.counter = 0;
+
+const gameOverPage = document.querySelector('.game-over-page');
+const playAgainButton = document.getElementById('playAgainButton');
+
+playAgainButton.addEventListener('click', () => {
+    gameOverPage.style.display = 'none';
+    gameCanvas.style.display = 'block';
+    startGame();
+});
+
 
 document.addEventListener('keydown', (event) => {
     if (event.code === 'Space' && player.onGround) {

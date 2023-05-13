@@ -12,6 +12,12 @@
         <h1>EtherPunks</h1>
         <button id="startGameButton">Start Game</button>
     </div>
+
+    <div class="game-over-page" style="display: none;">
+        <h1>Game Over</h1>
+        <button id="playAgainButton">Play Again</button>
+    </div>
+    
     <canvas id="gameCanvas" width="512" height="512"></canvas>
     <script src="main.js"></script>
 
@@ -27,8 +33,40 @@
         });
 
         function startGame() {
-            gameLoop()
-        }
+    // Reset player position and velocity
+    player.x = 50;
+    player.y = 300;
+    player.velocityX = 0;
+    player.velocityY = 0;
+    player.onGround = false;
+    player.moving = false;
+    player.direction = 'right';
+
+    // Reset enemies
+    enemies.length = 0;
+    for (let i = 0; i < numberOfEnemies; i++) {
+        const enemy = {
+            x: 300 + i * 250,
+            y: 424,
+            width: 32,
+            height: 48,
+            speed: 1,
+            direction: 'left'
+        };
+        enemies.push(enemy);
+    }
+
+    // Reset camera position
+    camera.x = 0;
+    camera.y = 0;
+
+    if (gameLoopId) {
+        cancelAnimationFrame(gameLoopId);
+    }
+    // Start the game loop
+    gameLoop();
+}
+
     </script>
 </body>
 
