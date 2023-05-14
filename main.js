@@ -17,6 +17,7 @@ const fireballImg = new Image();
 fireballImg.src = './images/fireball.png';
 const bgMusic = new Audio('Sounds/bgMusic.mp3');
 const fireballSound = new Audio('Sounds/fireball.wav');
+const popSound = new Audio('./Sounds/pop.wav');
 class GameObject {
     constructor(x, y, width, height) {
         this.x = x;
@@ -253,7 +254,11 @@ function update() {
         );
         fireballs.push(fireball);
         player.lastFireballTime = currentTime;
+    
+        fireballSound.currentTime = 0; // Reset the sound to the start
+        fireballSound.play(); // Play the fireball sound
     }
+    
     camera.x = player.x - (camera.width / 2);
     camera.y = player.y - (camera.height / 2);
     camera.x = Math.max(0, Math.min(camera.x, worldWidth - camera.width));
