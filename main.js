@@ -18,6 +18,7 @@ fireballImg.src = './images/fireball.png';
 const bgMusic = new Audio('Sounds/bgMusic.mp3');
 const fireballSound = new Audio('Sounds/fireball.wav');
 const popSound = new Audio('./Sounds/pop.wav');
+const gameOverSound = new Audio('./Sounds/gameover.wav');
 class GameObject {
     constructor(x, y, width, height) {
         this.x = x;
@@ -169,6 +170,8 @@ function update() {
             if (previousPlayerY + player.height <= enemy.y) {
                 enemies.splice(enemies.indexOf(enemy), 1);
                 score += 100;
+                popSound.currentTime = 0; // Reset the sound to the start
+                popSound.play(); // Play the pop soun
             } else {
                 gameOver();
             }
@@ -178,6 +181,8 @@ function update() {
             gameOverPage.style.display = 'flex';
             bgMusic.pause();
             bgMusic.currentTime = 0;
+            gameOverSound.currentTime = 0; // Reset the sound to the start
+            gameOverSound.play(); // Play the pop sound
         }
     }
     if (player.x >= worldWidth - player.width) {
@@ -214,6 +219,8 @@ function update() {
                 enemies.splice(enemies.indexOf(enemy), 1);
                 fireballs.splice(fireballs.indexOf(fireball), 1);
                 score += 100;
+                popSound.currentTime = 0; // Reset the sound to the start
+                popSound.play(); // Play the pop soun
                 break;
             }
         }
