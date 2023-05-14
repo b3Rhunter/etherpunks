@@ -79,6 +79,8 @@ const keys = {
     ArrowRight: false,
     KeyF: false
   };
+  let score = 0;
+  let startTime = Date.now();
 for (let i = 0; i < numberOfEnemies; i++) {
     const enemy = {
         x: 300 + i * 250,
@@ -163,6 +165,7 @@ function update() {
             player.y + player.height > enemy.y) {
             if (previousPlayerY + player.height <= enemy.y) {
                 enemies.splice(enemies.indexOf(enemy), 1);
+                score += 100;
             } else {
                 gameOver();
             }
@@ -203,6 +206,7 @@ function update() {
                 fireball.y + fireball.height > enemy.y) {
                 enemies.splice(enemies.indexOf(enemy), 1);
                 fireballs.splice(fireballs.indexOf(fireball), 1);
+                score += 100;
                 break;
             }
         }
@@ -284,6 +288,10 @@ function draw() {
         }
         ctx.restore();
     }
+    ctx.font = '20px Arial';
+ctx.fillStyle = 'white';
+ctx.fillText('Score: ' + Math.round(score), 10, 30);
+
 }
 let gameLoopId;
 function gameLoop() {
@@ -292,6 +300,11 @@ function gameLoop() {
         currentFrame = (currentFrame + 1) % frameCount;
     }
     draw();
+    let elapsedTime = Date.now() - startTime;
+    score -= elapsedTime * 0.0001;
+    if (score < 0) {
+        score = 0;
+    }
     gameLoopId = requestAnimationFrame(gameLoop);
 }
 gameLoop.counter = 0;
