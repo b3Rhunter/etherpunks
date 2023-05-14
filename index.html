@@ -39,6 +39,8 @@
     player.moving = false;
     player.direction = 'right';
     enemies.length = 0;
+    bgMusic.loop = true; // This will make the music loop when it ends
+    bgMusic.play();
     for (let i = 0; i < numberOfEnemies; i++) {
         const enemy = {
             x: 300 + i * 250,
@@ -53,7 +55,7 @@
     camera.x = 0;
     camera.y = 0;
     score = 0; // Reset the score
-
+    isGameOver = false;
     if (gameLoopId) {
         cancelAnimationFrame(gameLoopId);
     }

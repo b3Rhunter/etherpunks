@@ -19,6 +19,7 @@ const bgMusic = new Audio('Sounds/bgMusic.mp3');
 const fireballSound = new Audio('Sounds/fireball.wav');
 const popSound = new Audio('./Sounds/pop.wav');
 const gameOverSound = new Audio('./Sounds/gameover.wav');
+let isGameOver = false;
 class GameObject {
     constructor(x, y, width, height) {
         this.x = x;
@@ -177,12 +178,15 @@ function update() {
             }
         }
         function gameOver() {
-            gameCanvas.style.display = 'none';
-            gameOverPage.style.display = 'flex';
-            bgMusic.pause();
-            bgMusic.currentTime = 0;
-            gameOverSound.currentTime = 0; // Reset the sound to the start
-            gameOverSound.play(); // Play the pop sound
+            if (!isGameOver) { // Only execute if game is not already over
+                isGameOver = true;
+                gameCanvas.style.display = 'none';
+                gameOverPage.style.display = 'flex';
+                bgMusic.pause();
+                bgMusic.currentTime = 0;
+                gameOverSound.currentTime = 0; // Reset the sound to the start
+                gameOverSound.play(); // Play the game over sound
+            }
         }
     }
     if (player.x >= worldWidth - player.width) {
