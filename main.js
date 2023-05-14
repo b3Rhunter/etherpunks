@@ -48,7 +48,7 @@ const player = {
     direction: 'right'
 };
 const fireballs = [];
-const fireballSpeed = 5;
+const fireballSpeed = 7;
 const frameCount = 4;
 let currentFrame = 0;
 const frameWidth = player.width;
@@ -263,12 +263,12 @@ document.addEventListener('keydown', (event) => {
         event.preventDefault();
         console.log('KeyF key pressed'); // Add this line
         const fireball = {
-            x: player.direction === 'right' ? player.x + player.width : player.x - 10, // Adjust the initial x-position based on the player's direction
+            x: player.direction === 'right' ? player.x + player.width : player.x - 15, // Adjust the initial x-position based on the player's direction
             y: player.y + player.height / 2,
             velocityX: player.direction === 'right' ? fireballSpeed : -fireballSpeed,
             velocityY: fireballSpeed / 2,  // Give the fireball an initial y-velocity
-            width: 10,
-            height: 10,
+            width: 15,
+            height: 15,
             direction: player.direction,
             rotation: 0
         };
