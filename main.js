@@ -14,6 +14,8 @@ const enemies = [];
 const numberOfEnemies = 10;
 const playerSpriteSheet = new Image();
 playerSpriteSheet.src = './images/hero_spritesheet.png';
+const fireballImg = new Image();
+fireballImg.src = './images/fireball.png';
 for (let i = 0; i < numberOfEnemies; i++) {
     const enemy = {
         x: 300 + i * 250,
@@ -45,13 +47,14 @@ const player = {
     moving: false,
     direction: 'right'
 };
+const fireballs = [];
+const fireballSpeed = 5;
 const frameCount = 4;
 let currentFrame = 0;
 const frameWidth = player.width;
 const frameHeight = player.height;
 const jumpFrameY = 2 * frameHeight;
 const platforms = [
-    { x: 0, y: 472, width: 512, height: 40 },
     { x: 200, y: 372, width: 200, height: 20 },
     { x: 400, y: 272, width: 200, height: 20 },
     { x: 600, y: 372, width: 200, height: 20 },
@@ -135,7 +138,46 @@ function update() {
     if (player.x >= worldWidth - player.width) {
         gameCanvas.style.display = 'none';
         levelCompletePage.style.display = 'flex';
-    }    
+    } 
+    for (const fireball of fireballs) {
+        fireball.x += fireball.velocityX;
+        fireball.y += fireball.velocityY;
+        fireball.rotation += 0.05;
+        if (fireball.y + fireball.height >= floor.y) {
+            fireball.velocityY = -fireball.velocityY * 0.8; // Reduce the velocityY by 20% each time the fireball hits the ground
+            fireball.y = floor.y - fireball.height;  // Prevent the fireball from going below the ground
+        }
+        if (fireball.y <= 0 || fireball.y + fireball.height >= canvas.height) {
+            fireball.velocityY = -fireball.velocityY;
+        }
+        for (const platform of platforms) {
+            if (fireball.x + fireball.width >= platform.x &&
+                fireball.x <= platform.x + platform.width &&
+                fireball.y + fireball.height >= platform.y &&
+                fireball.y <= platform.y + platform.height) {
+                fireball.velocityY = -fireball.velocityY;
+                break;
+            }
+        }
+        for (const enemy of enemies) {
+            if (fireball.x < enemy.x + enemy.width &&
+                fireball.x + fireball.width > enemy.x &&
+                fireball.y < enemy.y + enemy.height &&
+                fireball.y + fireball.height > enemy.y) {
+                enemies.splice(enemies.indexOf(enemy), 1);
+                fireballs.splice(fireballs.indexOf(fireball), 1);
+                break;
+            }
+        }
+
+        if (fireball.x < player.x + player.width &&
+            fireball.x + fireball.width > player.x &&
+    fireball.y < player.y + player.height &&
+    fireball.y + fireball.height > player.y) {
+    gameOver();
+    break;
+    }
+    }
     camera.x = player.x - (camera.width / 2);
     camera.y = player.y - (camera.height / 2);
     camera.x = Math.max(0, Math.min(camera.x, worldWidth - camera.width));
@@ -155,6 +197,14 @@ function draw() {
         player.width, 
         player.height
     );
+    for (const fireball of fireballs) {
+        ctx.fillStyle = 'red'; // Set the fill style to red
+        ctx.save();  // Save the current state of the context
+        ctx.translate(fireball.x - camera.x + fireball.width / 2, fireball.y - camera.y + fireball.height / 2);  // Move the context to the center of the fireball
+        ctx.rotate(fireball.rotation);  // Rotate the context
+        ctx.drawImage(fireballImg, -fireball.width / 2, -fireball.height / 2, fireball.width, fireball.height);
+        ctx.restore();
+    }    
     for (const platform of platforms) {
         ctx.drawImage(platformImg, platform.x - camera.x, platform.y - camera.y, platform.width, platform.height);
     }
@@ -208,6 +258,22 @@ document.addEventListener('keydown', (event) => {
     }
     if (event.code === 'ArrowLeft' || event.code === 'ArrowRight') {
         player.moving = true;
+    }
+    if (event.code === 'KeyF') {
+        event.preventDefault();
+        console.log('KeyF key pressed'); // Add this line
+        const fireball = {
+            x: player.direction === 'right' ? player.x + player.width : player.x - 10, // Adjust the initial x-position based on the player's direction
+            y: player.y + player.height / 2,
+            velocityX: player.direction === 'right' ? fireballSpeed : -fireballSpeed,
+            velocityY: fireballSpeed / 2,  // Give the fireball an initial y-velocity
+            width: 10,
+            height: 10,
+            direction: player.direction,
+            rotation: 0
+        };
+        fireballs.push(fireball);
+        console.log(fireballs);
     }
 });
 document.addEventListener('keyup', (event) => {
