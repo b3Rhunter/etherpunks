@@ -10,23 +10,83 @@ const platformImg = new Image();
 platformImg.src = './images/platforms.png';
 const enemyImg = new Image();
 enemyImg.src = './images/enemy.png';
-const enemies = [];
 const numberOfEnemies = 10;
 const playerSpriteSheet = new Image();
 playerSpriteSheet.src = './images/hero_spritesheet.png';
 const fireballImg = new Image();
 fireballImg.src = './images/fireball.png';
-for (let i = 0; i < numberOfEnemies; i++) {
-    const enemy = {
-        x: 300 + i * 250,
-        y: 424,
-        width: 32,
-        height: 48,
-        speed: 1,
-        direction: 'left'
-    };
-    enemies.push(enemy);
+class GameObject {
+    constructor(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
 }
+class Player extends GameObject {
+    constructor(x, y, width, height) {
+        super(x, y, width, height);
+        this.velocityX = 0;
+        this.velocityY = 0;
+        this.onGround = false;
+        this.speed = 5;
+        this.moving = false;
+        this.direction = 'right';
+        this.lastFireballTime = 0;
+        this.fireballCooldown = 500;
+    }
+}
+class Enemy extends GameObject {
+    constructor(x, y, width, height) {
+        super(x, y, width, height);
+        this.speed = 1;
+        this.direction = 'left';
+        this.hitCount = 0;
+    }
+    knockBack(direction) {
+        const knockBackDistance = 50;
+        if (direction === 'right') {
+            this.x -= knockBackDistance;
+        } else {
+            this.x += knockBackDistance;
+        }
+    }
+}
+class Fireball extends GameObject {
+    constructor(x, y, width, height, direction) {
+        super(x, y, width, height);
+        this.velocityX = direction === 'right' ? fireballSpeed : -fireballSpeed;
+        this.velocityY = fireballSpeed / 2;
+        this.rotation = 0;
+    }
+}
+class Platform extends GameObject {
+    constructor(x, y, width, height) {
+        super(x, y, width, height);
+    }
+}
+const player = new Player(50, 300, 32, 48);
+const enemies = Array.from({length: numberOfEnemies}, (_, i) => new Enemy(300 + i * 250, 424, 32, 48));
+const fireballs = [];
+const platforms = [
+    new Platform(200, 372, 200, 20),
+    new Platform(400, 272, 200, 20),
+    new Platform(600, 372, 200, 20),
+    new Platform(800, 272, 200, 20),
+    new Platform(1000, 372, 100, 20),
+    new Platform(1200, 272, 100, 20),
+    new Platform(1400, 172, 50, 20),
+    new Platform(1600, 372, 100, 20),
+    new Platform(1800, 362, 200, 20),
+    new Platform(2000, 172, 50, 20),
+    new Platform(2300, 372, 75, 20),
+];
+const keys = {
+    Space: false,
+    ArrowLeft: false,
+    ArrowRight: false,
+    KeyF: false
+  };
 const camera = {
     x: 0,
     y: 0,
@@ -35,38 +95,12 @@ const camera = {
 };
 const worldWidth = canvas.width * 5;
 const worldHeight = canvas.height;
-const player = {
-    x: 50,
-    y: 300,
-    width: 32,
-    height: 48,
-    velocityX: 0,
-    velocityY: 0,
-    onGround: false,
-    speed: 5,
-    moving: false,
-    direction: 'right'
-};
-const fireballs = [];
 const fireballSpeed = 7;
 const frameCount = 4;
 let currentFrame = 0;
 const frameWidth = player.width;
 const frameHeight = player.height;
 const jumpFrameY = 2 * frameHeight;
-const platforms = [
-    { x: 200, y: 372, width: 200, height: 20 },
-    { x: 400, y: 272, width: 200, height: 20 },
-    { x: 600, y: 372, width: 200, height: 20 },
-    { x: 800, y: 272, width: 100, height: 20 },
-    { x: 1000, y: 372, width: 100, height: 20 },
-    { x: 1200, y: 272, width: 100, height: 20 },
-    { x: 1400, y: 172, width: 50, height: 20 },
-    { x: 1600, y: 372, width: 100, height: 20 },
-    { x: 1800, y: 362, width: 200, height: 20 },
-    { x: 2000, y: 172, width: 50, height: 20 },
-    { x: 2300, y: 372, width: 75, height: 20 },
-];
 const gravity = 1;
 const jumpHeight = 20;
 const floor = {
@@ -164,12 +198,15 @@ function update() {
                 fireball.x + fireball.width > enemy.x &&
                 fireball.y < enemy.y + enemy.height &&
                 fireball.y + fireball.height > enemy.y) {
-                enemies.splice(enemies.indexOf(enemy), 1);
+                enemy.hitCount++; // Increment hitCount
+                enemy.knockBack(player.direction); // Knock the enemy back
+                if (enemy.hitCount >= 3) { // If hitCount is 3 or more, remove the enemy
+                    enemies.splice(enemies.indexOf(enemy), 1);
+                }
                 fireballs.splice(fireballs.indexOf(fireball), 1);
                 break;
             }
         }
-
         if (fireball.x < player.x + player.width &&
             fireball.x + fireball.width > player.x &&
     fireball.y < player.y + player.height &&
@@ -177,6 +214,35 @@ function update() {
     gameOver();
     break;
     }
+    }
+    if (keys.ArrowLeft) {
+        player.velocityX = -player.speed;
+        player.direction = 'left';
+        player.moving = true;
+      } else if (keys.ArrowRight) {
+        player.velocityX = player.speed;
+        player.direction = 'right';
+        player.moving = true;
+      } else {
+        player.velocityX = 0;
+        player.moving = false;
+      }
+    
+      if (keys.Space && player.onGround) {
+        player.velocityY = -jumpHeight;
+        player.onGround = false;
+      }
+      const currentTime = Date.now();
+      if (keys.KeyF && currentTime - player.lastFireballTime >= player.fireballCooldown) {
+        const fireball = new Fireball(
+            player.direction === 'right' ? player.x + player.width : player.x - 15,
+            player.y + player.height / 2,
+            15,
+            15,
+            player.direction
+        );
+        fireballs.push(fireball);
+        player.lastFireballTime = currentTime;
     }
     camera.x = player.x - (camera.width / 2);
     camera.y = player.y - (camera.height / 2);
@@ -244,43 +310,14 @@ nextLevelButton.addEventListener('click', () => {
     startGame();
 });
 document.addEventListener('keydown', (event) => {
-    if (event.code === 'Space' && player.onGround) {
-        player.velocityY = -jumpHeight;
-        player.onGround = false;
+    if (event.code in keys) {
+      keys[event.code] = true;
     }
-    if (event.code === 'ArrowLeft') {
-        player.velocityX = -player.speed;
-        player.direction = 'left';
+  });
+  
+  document.addEventListener('keyup', (event) => {
+    if (event.code in keys) {
+      keys[event.code] = false;
     }
-    if (event.code === 'ArrowRight') {
-        player.velocityX = player.speed;
-        player.direction = 'right';
-    }
-    if (event.code === 'ArrowLeft' || event.code === 'ArrowRight') {
-        player.moving = true;
-    }
-    if (event.code === 'KeyF') {
-        event.preventDefault();
-        console.log('KeyF key pressed'); // Add this line
-        const fireball = {
-            x: player.direction === 'right' ? player.x + player.width : player.x - 15, // Adjust the initial x-position based on the player's direction
-            y: player.y + player.height / 2,
-            velocityX: player.direction === 'right' ? fireballSpeed : -fireballSpeed,
-            velocityY: fireballSpeed / 2,  // Give the fireball an initial y-velocity
-            width: 15,
-            height: 15,
-            direction: player.direction,
-            rotation: 0
-        };
-        fireballs.push(fireball);
-        console.log(fireballs);
-    }
-});
-document.addEventListener('keyup', (event) => {
-    if (event.code === 'ArrowLeft' || event.code === 'ArrowRight') {
-        player.velocityX = 0;
-    }
-    if (event.code === 'ArrowLeft' || event.code === 'ArrowRight') {
-        player.moving = false;
-    }
-});
+  });
+  
