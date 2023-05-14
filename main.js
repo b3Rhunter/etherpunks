@@ -41,15 +41,7 @@ class Enemy extends GameObject {
         super(x, y, width, height);
         this.speed = 1;
         this.direction = 'left';
-        this.hitCount = 0;
-    }
-    knockBack(direction) {
-        const knockBackDistance = 50;
-        if (direction === 'right') {
-            this.x -= knockBackDistance;
-        } else {
-            this.x += knockBackDistance;
-        }
+        this.hitCount = 0; 
     }
 }
 class Fireball extends GameObject {
@@ -87,6 +79,17 @@ const keys = {
     ArrowRight: false,
     KeyF: false
   };
+for (let i = 0; i < numberOfEnemies; i++) {
+    const enemy = {
+        x: 300 + i * 250,
+        y: 424,
+        width: 32,
+        height: 48,
+        speed: 1,
+        direction: 'left'
+    };
+    enemies.push(enemy);
+}
 const camera = {
     x: 0,
     y: 0,
@@ -198,15 +201,12 @@ function update() {
                 fireball.x + fireball.width > enemy.x &&
                 fireball.y < enemy.y + enemy.height &&
                 fireball.y + fireball.height > enemy.y) {
-                enemy.hitCount++; // Increment hitCount
-                enemy.knockBack(player.direction); // Knock the enemy back
-                if (enemy.hitCount >= 3) { // If hitCount is 3 or more, remove the enemy
-                    enemies.splice(enemies.indexOf(enemy), 1);
-                }
+                enemies.splice(enemies.indexOf(enemy), 1);
                 fireballs.splice(fireballs.indexOf(fireball), 1);
                 break;
             }
         }
+
         if (fireball.x < player.x + player.width &&
             fireball.x + fireball.width > player.x &&
     fireball.y < player.y + player.height &&
